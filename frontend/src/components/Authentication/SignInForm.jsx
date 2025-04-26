@@ -41,50 +41,60 @@ function SignInForm() {
 
     return (
     
-        <div>
-            <h2>{isSignUp ? 'Sign Up' : 'Sign In'}</h2>
+        <div className="flex flex-col items-center w-full max-w-sm mx-auto gap-6 p-6 bg-[#2D4739] text-[#C2B280] rounded-md shadow-lg">
+      <h2 className="text-2xl font-bold">{isSignUp ? 'Sign Up' : 'Sign In'}</h2>
 
-            <form onSubmit={handleSubmit}>
-                <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                required
-                onChange={(e) => setEmail(e.target.value)}
-                />
-                <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                required
-                onChange={(e) => setPassword(e.target.value)}
-                />
-                <button type="submit" disabled={loading}>
-                {loading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Sign In'}
-                </button>
-            </form>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          required
+          onChange={(e) => setEmail(e.target.value)}
+          className="border rounded p-2 bg-white text-black"
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          required
+          onChange={(e) => setPassword(e.target.value)}
+          className="border rounded p-2 bg-white text-black"
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-green-700 hover:bg-green-800 text-white font-semibold py-2 rounded transition disabled:opacity-50"
+        >
+          {loading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Sign In'}
+        </button>
+      </form>
 
-            <p style={{ marginTop: 10 }}>
-                {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-                <button
-                type="button"
-                onClick={() => {
-                    setIsSignUp(!isSignUp)
-                    setError('')
-                    setMessage('')
-                }}
-                >
-                {isSignUp ? 'Sign In' : 'Sign Up'}
-                </button>
-            </p>
+      <div className="text-center text-sm">
+        {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+        <button
+          type="button"
+          onClick={() => {
+            setIsSignUp(!isSignUp)
+            setError('')
+            setMessage('')
+          }}
+          className="underline text-blue-300 hover:text-blue-400 transition"
+        >
+          {isSignUp ? 'Sign In' : 'Sign Up'}
+        </button>
+      </div>
 
-            <button onClick={handleGoogleLogin} >
-                Sign in with Google
-            </button>
+      <button
+        onClick={handleGoogleLogin}
+        className="bg-blue-800 hover:bg-blue-900 text-white font-semibold py-2 px-4 rounded"
+      >
+        Sign in with Google
+      </button>
 
-            {error && <p style={{ color: 'red', marginTop: 10 }}>{error}</p>}
-            {message && <p style={{ color: 'green', marginTop: 10 }}>{message}</p>}
-        </div>
+      {error && <p className="text-red-400">{error}</p>}
+      {message && <p className="text-green-400">{message}</p>}
+    </div>
   )
 }
 

@@ -23,10 +23,24 @@ function WebcamAudioCapture() {
   const lastSentFriendIdRef = useRef("");
   const [serverSocketId, setServerSocketId] = useState("");
 
-  const canvasRef = useRef();
-  const [memories, setMemories] = useState([]);
-  const memoryFetchIntervalRef = useRef(null);
+  // const canvasRef = useRef();
+  // const [memories, setMemories] = useState([]);
+  // const memoryFetchIntervalRef = useRef(null);
 
+  // const canvas = document.getElementById('overlayCanvas');
+  // const context = canvas.getContext('2d');
+
+  // context.clearRect(0, 0, canvas.width, canvas.height);
+  // context.font = "24px Arial";
+  // context.fillStyle = "white";
+  // context.strokeStyle = "black";
+  // context.lineWidth = 2;
+
+  // context.strokeText("Memory: Visit Japan", 20, 40);
+  // context.fillText("Memory: Visit Japan", 20, 40);
+
+  const canvasRef = useRef(null);
+  const yRef = useRef(400);  
 
   useEffect(() => {
     loadModels();
@@ -80,9 +94,9 @@ function WebcamAudioCapture() {
 
       // await fetchMemories(); // fetch when webcame starts
 
-      memoryFetchIntervalRef.current = setInterval(() => {
-        fetchMemories(); // fetch every 60 seconds 
-      }, 30000);
+      // memoryFetchIntervalRef.current = setInterval(() => {
+      //   fetchMemories(); // fetch every 60 seconds 
+      // }, 30000);
 
     } catch (err) {
       console.error("Error accessing webcam and audio:", err);
@@ -98,7 +112,7 @@ function WebcamAudioCapture() {
       videoRef.current.srcObject.getTracks().forEach(track => track.stop());
       videoRef.current.srcObject = null;
     }
-    clearInterval(memoryFetchIntervalRef.current);
+    // clearInterval(memoryFetchIntervalRef.current);
 
   };
 
@@ -235,65 +249,120 @@ function WebcamAudioCapture() {
     };
   }, [isStreaming, userFriends, isRegistering, user?.id]);
 
+  // useEffect(() => {
+  //   if (isStreaming) {
+  //     const canvas = canvasRef.current;
+  //     const context = canvas.getContext('2d');
+
+  //     const drawOverlay = () => {
+  //       if (!videoRef.current) return;
+
+  //       canvas.width = videoRef.current.videoWidth;
+  //       canvas.height = videoRef.current.videoHeight;
+
+  //       context.clearRect(0, 0, canvas.width, canvas.height);
+
+  //       // Draw memory summaries 
+  //       context.font = '24px Arial'; 
+  //       context.fillStyle = 'rgba(255, 255, 255, 0.8)';
+  //       context.strokeStyle = 'black';
+  //       context.lineWidth = 2;
+
+  //       memories.forEach((memory, idx) => {
+  //         const y = 40 + idx * 40;
+  //         context.strokeText(memory,memory_summary, 10, y);
+  //         context.fillText(memory,memory_summary, 10, y);
+  //       });
+
+  //       requestAnimationFrame(drawOverlay)
+  //     };
+
+  //     drawOverlay();
+  //   }
+  // }, [isStreaming, memories])
+
   useEffect(() => {
-    if (isStreaming) {
-      const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
+    if (!isStreaming) return;
 
-      const drawOverlay = () => {
-        if (!videoRef.current) return;
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+    const text = "Trip to Japan 🎌";
+    const startX = 30;
+    const startY = 30;
 
-        canvas.width = videoRef.current.videoWidth;
-        canvas.height = videoRef.current.videoHeight;
+    const drawOutlinedText = (text, x, y, font = '18px Arial', fillColor = 'white', strokeColor = 'black', lineWidth = 3) => {
+      context.font = font;
+      context.fillStyle = fillColor;
+      context.strokeStyle = strokeColor;
+      context.lineWidth = lineWidth;
+    
+      context.strokeText(text, x, y);
+      context.fillText(text, x, y);
+    };
 
-        context.clearRect(0, 0, canvas.width, canvas.height);
+    function draw() {
+      if (!videoRef.current) return;
 
-        // Draw memory summaries 
-        context.font = '24px Arial'; 
-        context.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        context.strokeStyle = 'black';
-        context.lineWidth = 2;
+      // 1. Sync canvas size to video size
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      context.clearRect(0, 0, canvas.width, canvas.height);
 
-        memories.forEach((memory, idx) => {
-          const y = 40 + idx * 40;
-          context.strokeText(memory,memory_summary, 10, y);
-          context.fillText(memory,memory_summary, 10, y);
-        });
+      // Large rectangle
+      context.strokeStyle = 'red';
+      context.lineWidth = 2;
+      context.strokeRect(startX, startY, 300, 500);
 
-        requestAnimationFrame(drawOverlay)
-      };
+      context.font = "14px 'Courier New', monospace";
+      context.fillStyle = 'red';
+      context.textBaseline = "top";
 
-      drawOverlay();
+      let currentY = startY + 20;
+
+
+      drawOutlinedText(`Name: Yuta`, 20, 50, '40px Arial', 'white', 'black', 3);
+
+
+
+      requestAnimationFrame(draw);
     }
-  }, [isStreaming, memories])
+
+    draw();
+  }, [isStreaming]);
 
   return (
-    <div>
-      <button onClick={startWebcamAndAudio}>
-        {isStreaming ? "Active camera and streaming audio... " : "Start Webcam & Audio"}
+    <div className="flex flex-col items-center w-full p-4 gap-6">
+  <div className="flex gap-4">
+    <button
+      onClick={startWebcamAndAudio}
+      className="bg-green-700 hover:bg-green-800 text-white font-semibold py-2 px-6 rounded transition"
+    >
+      {isStreaming ? "Active camera and streaming audio..." : "Start Webcam & Audio"}
+    </button>
+
+    {isStreaming && (
+      <button
+        onClick={endWebcamAndAudio}
+        className="bg-yellow-700 hover:bg-yellow-800 text-white font-semibold py-2 px-6 rounded transition"
+      >
+        Stop Webcam & Audio
       </button>
+    )}
+  </div>
 
-      {isStreaming && (
-        <button onClick={endWebcamAndAudio}>
-          Stop Webcam & Audio
-        </button>
-      )}
-      <video
-        ref={videoRef}
-        autoPlay
-        muted
-        style={{
-          widht: "50%",
-          height: "auto",
-          marginTop: "20px",
-          border: "1px solid #ddd",
-        }}
-      />
-      <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0}}  />
-      {/* {isStreaming && ( <AudioStreamer isStreaming={isStreaming} />)
-      } */}
-
-    </div> 
+  <div className="relative w-full aspect-video border-4 border-[#C2B280] mt-6">
+    <video
+      ref={videoRef}
+      autoPlay
+      muted
+      className="absolute top-0 left-0 w-full h-full object-cover"
+    />
+    <canvas
+      ref={canvasRef}
+      className="absolute top-0 left-0 w-full h-full pointer-events-none"
+    />
+  </div>
+</div>
   );
 }
 

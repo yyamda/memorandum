@@ -7,9 +7,11 @@ export default function SignOutButton() {
     }
 
     return (
-        <button onClick={handleLogout}>
-            Sign Out
-        </button>
+        <button onClick={handleLogout}
+        className="mt-4 bg-yellow-900 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded transition"
+    >
+      Sign Out
+    </button>
 
 
     )
