@@ -2,6 +2,7 @@
 Flask==3.1.0
 flask-socketio
 eventlet
+uuid
 
 # Audio Transcription
 openai-whisper
@@ -10,3 +11,10 @@ pydub
 
 # Environment variables
 python-dotenv
+
+# Pinecone
+pinecone-client
+
+# LLM
+groq
+tf-keras

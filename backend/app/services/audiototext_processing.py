@@ -79,7 +79,6 @@ def process_audio_to_text(wav_bytes, friend_id: str):
 
             end = time.time()
             print("🎤 Whisper Result:", transcription_text)
-            # print(f"🧠 Diarization Result: {diarization_result}")
             print(f"✅ Audio model processing finished in {end - start:.2f}s")
 
         # append result to text buffer
