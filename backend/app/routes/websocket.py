@@ -1,6 +1,7 @@
 from flask_socketio import SocketIO
 from flask import request
 from services.audiototext_processing import buffer_audio_chunk
+from services.retrieval import retrieve_memory
 
 # Shared mapping of session ID → friend_id
 user_friend_map = {}
@@ -28,3 +29,5 @@ def register_socket_handlers(socketio: SocketIO):
         print(f" Received {len(data)} bytes from SID {sid}, friend_id: {friend_id}")
         if friend_id:
             buffer_audio_chunk(data, friend_id)
+    
+

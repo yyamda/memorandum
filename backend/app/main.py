@@ -3,7 +3,8 @@ from flask_socketio import SocketIO
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
-
+from services.retrieval import retrieve_memory
+from routes.websocket import register_socket_handlers, user_friend_map
 load_dotenv()
 
 
@@ -11,9 +12,6 @@ app = Flask(__name__)
 CORS(app)
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY')
 socketio = SocketIO(app, cors_allowed_origins="*")
-
-# Import routes (register WebSocket handlers)
-from routes.websocket import register_socket_handlers, user_friend_map
 register_socket_handlers(socketio)
 
 @app.route('/')
@@ -38,6 +36,22 @@ def set_friend_id():
     print("UserMap: ", user_friend_map)
     return jsonify({'status': 'ok'})
 
+@app.route('/api/retrieve_memory', methods=['POST'])
+def retrieve_memory_api():
+    print("Received pinecone vdb retrieval request \n")
+    data = request.get_json()
+    session_id = data.get('session_id')
+    friend_id = user_friend_map.get(session_id)
+
+    if friend_id:
+        memories = retrieve_memory("Novel things to bring back in conversation", friend_id)
+        print("Retreived Memories and sending back now \n")
+        print(memories)
+        print("\n")
+        return jsonify({'memories': memories})
+
+    return jsonify({'memories': [], 'message': 'No friend_id provided'})
+    
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, host="0.0.0.0", port=5001)

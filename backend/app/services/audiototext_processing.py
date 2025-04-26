@@ -7,7 +7,7 @@ import os
 import threading
 import whisper
 from pyannote.audio import Pipeline
-from services.text_store_pipeline import core_pipeline
+from services.storage import core_pipeline
 from dotenv import load_dotenv
 from pydub import AudioSegment
 import subprocess

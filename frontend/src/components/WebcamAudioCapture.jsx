@@ -23,6 +23,10 @@ function WebcamAudioCapture() {
   const lastSentFriendIdRef = useRef("");
   const [serverSocketId, setServerSocketId] = useState("");
 
+  const canvasRef = useRef();
+  const [memories, setMemories] = useState([]);
+  const memoryFetchIntervalRef = useRef(null);
+
 
   useEffect(() => {
     loadModels();
@@ -39,7 +43,32 @@ function WebcamAudioCapture() {
     console.log("Socket ID:", socket.id);
   });
 
+  const fetchMemories = async () => {
+
+    try {
+      console.log("Fetch request to backend for friend memories")
+      const response = await fetch('http://localhost:5001/api/retrieve_memory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({
+          query_text: "memory context",
+          session_id: serverSocketId
+        })
+      });
+
+
+      const data = await response.json();
+      console.log("Retrieved memories", data.memories)
+      if (data.memories) {
+        setMemories(data.memories);
+      }
+    } catch (error) {
+      console.error("Failed to fetch memories: ", error)
+    }
+  };
+
   const startWebcamAndAudio = async () => {
+
     try {
       const newStream = await navigator.mediaDevices.getUserMedia({
         video: true,
@@ -48,6 +77,13 @@ function WebcamAudioCapture() {
       videoRef.current.srcObject = newStream;
       setStream(newStream);
       setIsStreaming(true);
+
+      // await fetchMemories(); // fetch when webcame starts
+
+      memoryFetchIntervalRef.current = setInterval(() => {
+        fetchMemories(); // fetch every 60 seconds 
+      }, 30000);
+
     } catch (err) {
       console.error("Error accessing webcam and audio:", err);
     }
@@ -58,6 +94,12 @@ function WebcamAudioCapture() {
       stream.getTracks().forEach(track => track.stop());
       setIsStreaming(false);
     }
+    if (videoRef.current?.srcObject) {
+      videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    clearInterval(memoryFetchIntervalRef.current);
+
   };
 
   const notifyServerFriendId = (friendId) => {
@@ -130,7 +172,7 @@ function WebcamAudioCapture() {
         const timestamp = new Date().toISOString();
         const tempName = `Person_${timestamp.substring(0, 10)}_${Date.now().toString().slice(-6)}`;
         const newFriendId = uuidv4();
-        matchedFriendIdRef.current = friend.friend_id;
+        matchedFriendIdRef.current = newFriendId;
 
         const { error } = await supabase
           .from('social_relations')
@@ -193,6 +235,38 @@ function WebcamAudioCapture() {
     };
   }, [isStreaming, userFriends, isRegistering, user?.id]);
 
+  useEffect(() => {
+    if (isStreaming) {
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+
+      const drawOverlay = () => {
+        if (!videoRef.current) return;
+
+        canvas.width = videoRef.current.videoWidth;
+        canvas.height = videoRef.current.videoHeight;
+
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw memory summaries 
+        context.font = '24px Arial'; 
+        context.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        context.strokeStyle = 'black';
+        context.lineWidth = 2;
+
+        memories.forEach((memory, idx) => {
+          const y = 40 + idx * 40;
+          context.strokeText(memory,memory_summary, 10, y);
+          context.fillText(memory,memory_summary, 10, y);
+        });
+
+        requestAnimationFrame(drawOverlay)
+      };
+
+      drawOverlay();
+    }
+  }, [isStreaming, memories])
+
   return (
     <div>
       <button onClick={startWebcamAndAudio}>
@@ -215,11 +289,9 @@ function WebcamAudioCapture() {
           border: "1px solid #ddd",
         }}
       />
-      {isStreaming && (
-        <AudioStreamer 
-          isStreaming={isStreaming} 
-        />)
-      }
+      <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0}}  />
+      {/* {isStreaming && ( <AudioStreamer isStreaming={isStreaming} />)
+      } */}
 
     </div> 
   );
