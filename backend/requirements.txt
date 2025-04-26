@@ -1,0 +1,12 @@
+# WebSocket + Server
+Flask==3.1.0
+flask-socketio
+eventlet
+
+# Audio Transcription
+openai-whisper
+pyannote.audio
+pydub
+
+# Environment variables
+python-dotenv
