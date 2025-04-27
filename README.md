@@ -16,9 +16,9 @@ The app supports two major flows:
 ---
 
 ## 🗂️ Storage Flow
-1. 📸 The person in the user’s field of vision is **identified** and **recognized** using **face embedding similarity scores**.
-2. 🎙️ A **real-time conversation** with the identified person is **recorded** and **transcribed**.
-3. 🧠 The conversation is **processed** via an **LLM** and **stored** in a **Pinecone Vector Database**.
+1. 📸 The person in the user’s field of vision is **identified** and **recognized** using **face embedding similarity scores** by fast-api.
+2. 🎙️ A **real-time conversation** with the identified person is **recorded** and **transcribed** through WebSocketIO, ffmpeg, and OpenAI Whisper.
+3. 🧠 The conversation is **processed** via an **LLM** (Llama via Groq client) and **stored** in a **Pinecone Vector Database**.
 
 ---
 
