@@ -286,9 +286,17 @@ function WebcamAudioCapture() {
 
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
-    const text = "Trip to Japan 🎌";
-    const startX = 30;
-    const startY = 30;
+    const startX = 7.5;
+    const startY = 20;
+
+    const drawLine = (x1, y1, x2, y2, stroke_style='white', line_width=2) => {
+      context.beginPath();
+      context.moveTo(x1, y1);
+      context.lineTo(x2, y2);
+      context.strokeStyle = stroke_style;
+      context.lineWidth = line_width;
+      context.stroke();
+    }
 
     const drawOutlinedText = (text, x, y, font = '18px Arial', fillColor = 'white', strokeColor = 'black', lineWidth = 3) => {
       context.font = font;
@@ -308,22 +316,59 @@ function WebcamAudioCapture() {
       canvas.height = videoRef.current.videoHeight;
       context.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Large rectangle
-      context.strokeStyle = 'red';
+      // Parent Rectangle Card
+      const rectWidth = 250
+      const rectHeight = 450
+
+      // Fill rectangle with transparent green
+      context.fillStyle = 'rgba(34, 85, 34, 0.7)';  // Dark green, 10% opacity
+      context.fillRect(startX, startY, rectWidth, rectHeight);
+
+      // Write up rectangle 
+      context.strokeStyle = 'rgb(34, 85, 34)';
       context.lineWidth = 2;
-      context.strokeRect(startX, startY, 300, 500);
+      context.strokeRect(startX, startY, 250, 450);
 
       context.font = "14px 'Courier New', monospace";
-      context.fillStyle = 'red';
+      context.fillStyle = 'green';
       context.textBaseline = "top";
+      
+      // Complimentary Texts
+      let currentX = startX + 5;
+      let currentY  = startY + 10;
+      // Name
+      drawOutlinedText(`YUTA`, currentX, currentY, "36px 'Orbitron', sans-serif", '#4ed42b', '#57c43b', 3);
+      // Age 
+      currentX += 160;
+      currentY += 5
+      drawOutlinedText(`Age: 21`, currentX, currentY, "20px 'Orbitron', sans-serif", '#4ed42b', '#57c43b', 1);
 
-      let currentY = startY + 20;
+      // Relationship 
+      currentX -= 160;
+      currentY += 60
+      drawOutlinedText(`Relationship: older brother`, currentX, currentY, "14px 'Orbitron', sans-serif", '#4ed42b', '#57c43b', 1);
 
+      // Occupation 
+      currentX += 0;
+      currentY += 30;
+      drawOutlinedText(`Occupation: Fisherman`, currentX, currentY, "14px 'Orbitron', sans-serif", '#4ed42b', '#57c43b', 1);
 
-      drawOutlinedText(`Name: Yuta`, 20, 50, '40px Arial', 'white', 'black', 3);
+      // Last Seen 
+      currentX += 0;
+      currentY += 30;
+      drawOutlinedText(`Last Seen: 2023-05-01`, currentX, currentY, "14px 'Orbitron', sans-serif", '#4ed42b', '#57c43b', 1);
 
+      // Residence 
+      currentX += 0;
+      currentY += 30;
+      drawOutlinedText(`Lives at: Redondo Beach`, currentX, currentY, "14px 'Orbitron', sans-serif", '#4ed42b', '#57c43b', 1);
 
+      // Line 
+      currentX += 0;
+      currentY += 40;
+      drawLine(currentX, currentY, currentX + 225, currentY, '#4ed42b', 5)
 
+  
       requestAnimationFrame(draw);
     }
 
