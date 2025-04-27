@@ -22,25 +22,25 @@ function WebcamAudioCapture() {
   const matchedFriendIdRef = useState("");
   const lastSentFriendIdRef = useRef("");
   const [serverSocketId, setServerSocketId] = useState("");
-
-  // const canvasRef = useRef();
-  // const [memories, setMemories] = useState([]);
-  // const memoryFetchIntervalRef = useRef(null);
-
-  // const canvas = document.getElementById('overlayCanvas');
-  // const context = canvas.getContext('2d');
-
-  // context.clearRect(0, 0, canvas.width, canvas.height);
-  // context.font = "24px Arial";
-  // context.fillStyle = "white";
-  // context.strokeStyle = "black";
-  // context.lineWidth = 2;
-
-  // context.strokeText("Memory: Visit Japan", 20, 40);
-  // context.fillText("Memory: Visit Japan", 20, 40);
-
   const canvasRef = useRef(null);
   const yRef = useRef(400);  
+
+  // AR Card State Variables
+  const memoryTexts = [
+    "Met at LA Hacks 2024, discussed AI projects.",
+    "Recently moved to San Diego for a new job.",
+    "Favorite hobby: building custom keyboards.",
+    "Upcoming trip to Japan in June 2025!",
+    "Working on a new AI voice assistant prototype.",
+    "Loves Yakiniku and matcha desserts.",
+    "Met at LA Hacks 2024, discussed AI projects.",
+    "Recently moved to San Diego for a new job.",
+    "Favorite hobby: building custom keyboards.",
+    "Upcoming trip to Japan in June 2025!",
+    "Working on a new AI voice assistant prototype.",
+    "Loves Yakiniku and matcha desserts."
+  ];
+  
 
   useEffect(() => {
     loadModels();
@@ -249,38 +249,6 @@ function WebcamAudioCapture() {
     };
   }, [isStreaming, userFriends, isRegistering, user?.id]);
 
-  // useEffect(() => {
-  //   if (isStreaming) {
-  //     const canvas = canvasRef.current;
-  //     const context = canvas.getContext('2d');
-
-  //     const drawOverlay = () => {
-  //       if (!videoRef.current) return;
-
-  //       canvas.width = videoRef.current.videoWidth;
-  //       canvas.height = videoRef.current.videoHeight;
-
-  //       context.clearRect(0, 0, canvas.width, canvas.height);
-
-  //       // Draw memory summaries 
-  //       context.font = '24px Arial'; 
-  //       context.fillStyle = 'rgba(255, 255, 255, 0.8)';
-  //       context.strokeStyle = 'black';
-  //       context.lineWidth = 2;
-
-  //       memories.forEach((memory, idx) => {
-  //         const y = 40 + idx * 40;
-  //         context.strokeText(memory,memory_summary, 10, y);
-  //         context.fillText(memory,memory_summary, 10, y);
-  //       });
-
-  //       requestAnimationFrame(drawOverlay)
-  //     };
-
-  //     drawOverlay();
-  //   }
-  // }, [isStreaming, memories])
-
   useEffect(() => {
     if (!isStreaming) return;
 
@@ -308,6 +276,7 @@ function WebcamAudioCapture() {
       context.fillText(text, x, y);
     };
 
+    let scrollOffset = 0; // Global ref outside of draw()
     function draw() {
       if (!videoRef.current) return;
 
@@ -329,13 +298,14 @@ function WebcamAudioCapture() {
       context.lineWidth = 2;
       context.strokeRect(startX, startY, 250, 450);
 
-      context.font = "14px 'Courier New', monospace";
-      context.fillStyle = 'green';
+      context.font = "16px 'Orbitron', sans-serif";
+      context.fillStyle = '#4ed42b';
       context.textBaseline = "top";
       
       // Complimentary Texts
       let currentX = startX + 5;
       let currentY  = startY + 10;
+
       // Name
       drawOutlinedText(`YUTA`, currentX, currentY, "36px 'Orbitron', sans-serif", '#4ed42b', '#57c43b', 3);
       // Age 
@@ -365,10 +335,49 @@ function WebcamAudioCapture() {
 
       // Line 
       currentX += 0;
-      currentY += 40;
+      currentY += 30;
       drawLine(currentX, currentY, currentX + 225, currentY, '#4ed42b', 5)
+      
+      const textAreaX = currentX;
+      const textAreaY = currentY + 40
+      const textAreaWidth = rectWidth - 20;
+      const lineHeight = 24;
+      const scrollTopY = currentY + 5
 
-  
+      currentY = textAreaY - scrollOffset;
+
+      for (let text of memoryTexts) {
+        const words = text.split(' ');
+        let line = '';
+
+        for (let word of words) {
+          const testLine = line + word + ' ';
+          const metrics = context.measureText(testLine);
+          const testWidth = metrics.width;
+
+          if (testWidth > textAreaWidth) {
+            if (currentY >= scrollTopY && currentY <= startY + rectHeight - 20)  {
+              context.fillText(line, currentX, currentY)
+            }
+            line = word + ' '; 
+            currentY += lineHeight;
+          } else {
+            line = testLine;
+          }
+        }
+        if (currentY >= scrollTopY && currentY <= startY + rectHeight - 20) {
+          context.fillText(line, currentX, currentY);
+        }
+        currentY += lineHeight + 10;
+      }
+
+      // Scroll down slowly 
+      scrollOffset += 0.3; // scroll speed 
+      const totalHeight = memoryTexts.length * (lineHeight + 10) * 1.5; // Rough estimate
+      if (scrollOffset > totalHeight) {
+        scrollOffset = 0; // reset scroll
+      }
+
       requestAnimationFrame(draw);
     }
 

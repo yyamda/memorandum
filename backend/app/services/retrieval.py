@@ -10,7 +10,6 @@ pc = Pinecone(
 index = pc.Index("memorandum")
 
 def retrieve_memory(query_text, friend_id):
-
     query_embedding = pc.inference.embed(
         model="multilingual-e5-large",
         inputs=[query_text],
