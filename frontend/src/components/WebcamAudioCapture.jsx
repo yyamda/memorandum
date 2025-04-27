@@ -23,8 +23,48 @@ function WebcamAudioCapture() {
   const lastSentFriendIdRef = useRef("");
   const [serverSocketId, setServerSocketId] = useState("");
   const canvasRef = useRef(null);
-  const yRef = useRef(400);  
   const detectionsRef = useRef([]);
+  const arCardDataRef = useRef({
+    name: "???",
+    age: "?",
+    relationship: "???",
+    occupation: "???",
+    lastSeen: "???",
+    residence: "???",
+    memories: [
+      "---------------------",
+      "---------------------",
+       "---------------------", 
+       "---------------------", 
+       "---------------------", 
+       "---------------------",
+      "Have not identified person",
+      "---------------------",
+      "---------------------",
+      "---------------------",
+      "---------------------",
+      "---------------------",
+      "---------------------",
+      "Have not identified person",
+      "---------------------",
+      "---------------------",
+      "---------------------",
+      "---------------------",
+      "---------------------",
+      "---------------------",
+      "Have not identified person",
+      "---------------------",
+      "---------------------",
+      "---------------------",
+      "---------------------",
+      "---------------------",
+      "---------------------",
+
+
+    ],
+  });
+  const retrievedRef = useRef(false); 
+
 
   // AR Card State Variables
   const memoryTexts = [
@@ -64,7 +104,7 @@ function WebcamAudioCapture() {
 
     try {
       console.log("Fetch request to backend for friend memories")
-      const response = await fetch('http://localhost:5001/api/retrieve_memory', {
+      const response = await fetch('http://localhost:5001/api/retrieve_static', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }, 
         body: JSON.stringify({
@@ -73,11 +113,10 @@ function WebcamAudioCapture() {
         })
       });
 
-
       const data = await response.json();
       console.log("Retrieved memories", data.memories)
       if (data.memories) {
-        setMemories(data.memories);
+        arCardDataRef.current.memories = data.memories
       }
     } catch (error) {
       console.error("Failed to fetch memories: ", error)
@@ -174,8 +213,52 @@ function WebcamAudioCapture() {
         }
         // Only update and notify if the matched friend has changed
         if (matchedFriendIdRef.current !== closestMatch.friend_id) {
+          console.log("Matched Current: ", matchedFriendIdRef.current)
+          console.log("Queried Id: ", closestMatch.friend_id)
           matchedFriendIdRef.current = closestMatch.friend_id;
-        
+
+          if (!retrievedRef.current) {
+          arCardDataRef.current = {
+            name: closestMatch.first,
+            age: closestMatch.age,
+            relationship: closestMatch.relationship,
+            occupation: closestMatch.occupation,
+            lastSeen: closestMatch.lastseen,
+            residence: closestMatch.residence,
+            memories: [
+              "---------------------", 
+              "---------------------", 
+              "---------------------", 
+              "---------------------", 
+              "---------------------", 
+              "---------------------", 
+              "Person identified!!! Fetching past conversations from vector database...",
+              "---------------------", 
+              "---------------------", 
+              "---------------------", 
+              "---------------------", 
+              "---------------------", 
+              "Person identified!!! Fetching past conversations from vector database...",
+              "---------------------", 
+              "---------------------", 
+              "---------------------", 
+              "---------------------", 
+              "---------------------", 
+              "Person identified!!! Fetching past conversations from vector database...",
+              "---------------------", 
+              "---------------------", 
+              "---------------------", 
+              "---------------------", 
+              "---------------------", 
+            ]
+          };
+        }
+
+          if (!retrievedRef.current) {
+            fetchMemories();
+            retrievedRef.current = true
+          }
+          
           //  Only send to backend if it's a new friend_id (not duplicate)
           if (lastSentFriendIdRef.current !== closestMatch.friend_id) {
             lastSentFriendIdRef.current = closestMatch.friend_id;
@@ -242,7 +325,7 @@ function WebcamAudioCapture() {
           } catch (error) {
             console.error("Error in face detection loop");
           }
-        }, 2000);
+        }, 10000);
       };
 
       runFaceDetectionLoop();
@@ -327,36 +410,38 @@ function WebcamAudioCapture() {
       let currentY  = startY + 10;
 
       // Name
-      drawOutlinedText(`YUTA`, currentX, currentY, "36px 'Orbitron', sans-serif", '#4ed42b', '#57c43b', 3);
+      drawOutlinedText(`${arCardDataRef.current.name}`, currentX, currentY, "36px 'Orbitron', sans-serif", '#4ed42b', '#57c43b', 3);
       // Age 
       currentX += 160;
       currentY += 5
-      drawOutlinedText(`Age: 21`, currentX, currentY, "20px 'Orbitron', sans-serif", '#4ed42b', '#57c43b', 1);
+      drawOutlinedText(`Age: ${arCardDataRef.current.age}`, currentX, currentY, "20px 'Orbitron', sans-serif", '#4ed42b', '#57c43b', 1);
 
       // Relationship 
       currentX -= 160;
       currentY += 60
-      drawOutlinedText(`Relationship: older brother`, currentX, currentY, "14px 'Orbitron', sans-serif", '#4ed42b', '#57c43b', 1);
+      drawOutlinedText(`Relationship: ${arCardDataRef.current.relationship}`, currentX, currentY, "14px 'Orbitron', sans-serif", '#4ed42b', '#57c43b', 1);
 
       // Occupation 
       currentX += 0;
       currentY += 30;
-      drawOutlinedText(`Occupation: Fisherman`, currentX, currentY, "14px 'Orbitron', sans-serif", '#4ed42b', '#57c43b', 1);
+      drawOutlinedText(`Occupation: ${arCardDataRef.current.occupation}`, currentX, currentY, "14px 'Orbitron', sans-serif", '#4ed42b', '#57c43b', 1);
 
       // Last Seen 
       currentX += 0;
       currentY += 30;
-      drawOutlinedText(`Last Seen: 2023-05-01`, currentX, currentY, "14px 'Orbitron', sans-serif", '#4ed42b', '#57c43b', 1);
+      drawOutlinedText(`Last Seen: ${arCardDataRef.current.lastSeen}`, currentX, currentY, "14px 'Orbitron', sans-serif", '#4ed42b', '#57c43b', 1);
 
       // Residence 
       currentX += 0;
       currentY += 30;
-      drawOutlinedText(`Lives at: Redondo Beach`, currentX, currentY, "14px 'Orbitron', sans-serif", '#4ed42b', '#57c43b', 1);
+      drawOutlinedText(`Lives at: ${arCardDataRef.current.residence}`, currentX, currentY, "14px 'Orbitron', sans-serif", '#4ed42b', '#57c43b', 1);
 
-      // Line 
+
+      // Break Line 
       currentX += 0;
       currentY += 30;
       drawLine(currentX, currentY, currentX + 225, currentY, '#4ed42b', 5)
+
       
       const textAreaX = currentX;
       const textAreaY = currentY + 40
@@ -365,8 +450,9 @@ function WebcamAudioCapture() {
       const scrollTopY = currentY + 5
 
       currentY = textAreaY - scrollOffset;
+      context.font = "14px 'Orbitron', sans-serif";
 
-      for (let text of memoryTexts) {
+      for (let text of arCardDataRef.current.memories) {
         const words = text.split(' ');
         let line = '';
 
@@ -435,6 +521,11 @@ function WebcamAudioCapture() {
       ref={canvasRef}
       className="absolute top-0 left-0 w-full h-full pointer-events-none"
     />
+    {isStreaming && (
+        <AudioStreamer 
+          isStreaming={isStreaming} 
+        />)
+      }
   </div>
 </div>
   );

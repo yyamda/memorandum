@@ -159,3 +159,19 @@ def assemble_speaker_transcript(transcript, diarize_note):
     return f"{transcript.strip()}\n" + "\n".join(diarized)
 
 
+
+
+memories = [
+    "we went to Rose Bowl in 2014",
+    "Yuta has just started going to college in 2023",
+    "We talked about reading Crime And Punishment",
+    "Toured him across Kanazawa's Noto region in 2021",
+    "Played golf together in Los Angeles when he wsa 15",
+    "Talked about his orchestra performing across seas",
+    "Discussed the difference between IPAs and Pilsners",
+    "Yuta just graduated high school alongside his sister Karina",
+    "I visited the US and watched Yuta play goaltender for Jr Kings",
+    "We talked about how Yuta's dad was a huge problem in high school",
+    "Yuta just moved to Seattle",
+    
+]

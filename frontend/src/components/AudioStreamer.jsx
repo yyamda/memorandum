@@ -10,6 +10,7 @@ function AudioStreamer({ isStreaming }) {
     const hasStartedRef = useRef(false); // 🚀 Track if streaming already started
 
     useEffect(() => {
+        console.log("Streaming audio START!")
         const startStreaming = async () => {
             console.log("🎬 Starting streaming...");
 

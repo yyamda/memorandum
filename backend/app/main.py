@@ -2,9 +2,11 @@ from flask import Flask, request, jsonify
 from flask_socketio import SocketIO
 from flask_cors import CORS
 from dotenv import load_dotenv
+import time
 import os
 from services.retrieval import retrieve_memory
 from routes.websocket import register_socket_handlers, user_friend_map
+from services.audiototext_processing import memories
 load_dotenv()
 
 
@@ -51,6 +53,13 @@ def retrieve_memory_api():
         return jsonify({'memories': memories})
 
     return jsonify({'memories': [], 'message': 'No friend_id provided'})
+
+
+@app.route('/api/retrieve_static', methods=['POST'])
+def retrieve_static():
+    print("Received pinecone vdb retrieval request \n")
+    time.sleep(7)
+    return jsonify({'memories': memories})
     
 
 if __name__ == '__main__':
