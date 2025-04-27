@@ -24,6 +24,7 @@ function WebcamAudioCapture() {
   const [serverSocketId, setServerSocketId] = useState("");
   const canvasRef = useRef(null);
   const yRef = useRef(400);  
+  const detectionsRef = useRef([]);
 
   // AR Card State Variables
   const memoryTexts = [
@@ -43,7 +44,9 @@ function WebcamAudioCapture() {
   
 
   useEffect(() => {
+    console.log("Loading face models...")
     loadModels();
+    console.log("Loading complete")
   }, []);
 
   useEffect(() => {
@@ -232,13 +235,14 @@ function WebcamAudioCapture() {
 
           try {
             const detections = await detectFacesWithDescriptors(videoRef.current);
+            detectionsRef.current = detections;
             if (detections.length > 0) {
               await registerOrAppendFace(detections[0].descriptor);
             }
           } catch (error) {
             console.error("Error in face detection loop");
           }
-        }, 5000);
+        }, 2000);
       };
 
       runFaceDetectionLoop();
@@ -280,10 +284,26 @@ function WebcamAudioCapture() {
     function draw() {
       if (!videoRef.current) return;
 
+
       // 1. Sync canvas size to video size
       canvas.width = videoRef.current.videoWidth;
       canvas.height = videoRef.current.videoHeight;
       context.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw detected faces 
+      if (detectionsRef.current && detectionsRef.current.length > 0) {
+        for (const detection of detectionsRef.current) {
+          const box = detection.detection.box;
+          const x = box.x;
+          const y = box.y;
+          const width = box.width;
+          const height = box.height;
+      
+          context.strokeStyle = '#4ed42b'; // bright green
+          context.lineWidth = 3;
+          context.strokeRect(x, y, height, width);
+        }
+      }
 
       // Parent Rectangle Card
       const rectWidth = 250
