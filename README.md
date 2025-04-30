@@ -7,7 +7,7 @@
 ---
 
 ## ✨ Summary 
-**Memorandum** is a fullstack web application that helps users **recall past conversations** with individuals currently in their **field of vision**.
+**Memorandum** is a fullstack web application that helps users **recall past conversations** with individuals currently in their **field of vision**. The app 1) recognizes the individual through a face embedding similarity scoring (face-api.js) then 2) retrieves individual information stored in Supabase (categorical info) and Pinecone (conversational info) and displays to the UI.
 
 The app supports two major flows:
 - **1) Information Storage**
